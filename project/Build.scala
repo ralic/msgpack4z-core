@@ -14,7 +14,6 @@ object build extends Build {
   val mimaBasis = SettingKey[String]("mimaBasis")
 
   private[this] val msgpack4zNativeVersion = "0.3.0"
-  private[this] val scalapropsVersion = "0.3.0"
 
   lazy val msgpack4z = CrossProject("msgpack4z-core", file("."), CustomCrossType).settings(
     Seq(
@@ -27,8 +26,6 @@ object build extends Build {
     libraryDependencies ++= (
       ("org.scalaz" %%% "scalaz-core" % Common.ScalazVersion) ::
       ("com.github.xuwei-k" %% "zeroapply-scalaz" % "0.2.0" % "provided") ::
-      ("com.github.scalaprops" %%% "scalaprops" % scalapropsVersion % "test") ::
-      ("com.github.scalaprops" %%% "scalaprops-scalazlaws" % scalapropsVersion % "test") ::
       Nil
     )
   ).enablePlugins(
@@ -58,8 +55,17 @@ object build extends Build {
     )
   )
 
-  lazy val msgpack4zJVM = msgpack4z.jvm
-  lazy val msgpack4zJS = msgpack4z.js
+  val scalapropsURI = uri("git://github.com/scalaprops/scalaprops.git#7a3ecce02602aa00a49183b59f022a82609b1532")
+
+  lazy val msgpack4zJVM = msgpack4z.jvm.dependsOn(
+    ProjectRef(scalapropsURI, "scalapropsJVM"),
+    ProjectRef(scalapropsURI, "scalazlawsJVM")
+  )
+
+  lazy val msgpack4zJS = msgpack4z.js.dependsOn(
+    ProjectRef(scalapropsURI, "scalapropsJS"),
+    ProjectRef(scalapropsURI, "scalazlawsJS")
+  )
 
   private[this] lazy val noPublish = Seq(
     PgpKeys.publishSigned := {},
